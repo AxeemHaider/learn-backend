@@ -5,7 +5,7 @@ import database from "./database";
 
 const app = express();
 
-app.use(morgan("combined"));
+app.use(morgan("dev"));
 app.use(bodyParser.json());
 
 // Create User
@@ -56,4 +56,6 @@ app.patch("/users/:id", (req, res) => {
   res.json(database.users[userIndex]);
 });
 
-app.listen(5000);
+app.listen(5000, () => {
+  console.log("Server is running on http://localhost:5000")
+});
