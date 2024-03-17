@@ -10,7 +10,32 @@ interface Database {
 }
 
 const database: Database = {
-  users: [],
+  users: [
+    {
+      id: "1",
+      name: "adil",
+      age: 35,
+      address: "lhr",
+    },
+    {
+      id: "2",
+      name: "waqas",
+      age: 30,
+      address: "ptk",
+    },
+    {
+      id: "3",
+      name: "azeem",
+      age: 31,
+      address: "ptk",
+    },
+    {
+      id: "4",
+      name: "waseem",
+      age: 40,
+      address: "isb",
+    },
+  ],
 };
 
 export default database;
