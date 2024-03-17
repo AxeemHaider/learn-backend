@@ -1,7 +1,7 @@
 import express from "express";
 import morgan from "morgan";
 import bodyParser from "body-parser";
-import database from "./database";
+import database, { User } from "./database";
 
 const app = express();
 
@@ -26,8 +26,29 @@ app.get("/users", (req, res) => {
 
 // Search user
 app.get("/users/search", (req, res) => {
-  const query = req.query;
-  res.json(query);
+  const address: string = req.query.address as string;
+  const name: string = req.query.name as string;
+  console.log(req.query);
+
+  let userAddress: any;
+  if (address) {
+    userAddress = database.users.filter(
+      (e) => e.address?.toLowerCase() === address.toLowerCase()
+    );
+  }
+
+  let userName: any;
+  if (name) {
+    userName = database.users.filter(
+      (e) => e.name?.toLowerCase() === name.toLowerCase()
+    );
+  }
+  let answer;
+  if (userAddress && userName) {
+    answer = [...userAddress, ...userName];
+  }
+
+  res.json(answer);
 });
 
 // Get user by id
@@ -57,5 +78,5 @@ app.patch("/users/:id", (req, res) => {
 });
 
 app.listen(5000, () => {
-  console.log("Server is running on http://localhost:5000")
+  console.log("Server is running on http://localhost:5000");
 });

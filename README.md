@@ -8,6 +8,7 @@
 ## New project
 
 - `npm init`
+-
 - `tsc --init` // For typescript
 - `npm install --save express morgan ts-node  body-parser` // Dependencies
 - `npm install --save-dev ts-node-dev` // Dev Dependency
