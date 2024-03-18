@@ -2,7 +2,6 @@ import "reflect-metadata";
 import express from "express";
 import morgan from "morgan";
 import bodyParser from "body-parser";
-import database from "./database";
 import { DataSource } from "typeorm";
 import User from "./entities/user";
 
