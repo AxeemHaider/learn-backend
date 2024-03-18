@@ -1,8 +1,8 @@
 export interface User {
-  id?: string;
-  name?: string;
-  age?: number;
-  address?: string;
+  id: string;
+  name: string;
+  age: number;
+  address: string;
 }
 
 interface Database {
@@ -11,13 +11,29 @@ interface Database {
 
 const database: Database = {
   users: [
-    { id: "1", name: "adil", age: 23, address: "Kasur" },
-    { id: "3", name: "waqas", age: 23, address: "Pattoki" },
+    {
+      id: "1",
+      name: "adil",
+      age: 35,
+      address: "lhr",
+    },
     {
       id: "2",
-      name: "afran haider",
-      age: 500,
-      address: "Lahore",
+      name: "waqas",
+      age: 30,
+      address: "ptk",
+    },
+    {
+      id: "3",
+      name: "azeem",
+      age: 31,
+      address: "ptk",
+    },
+    {
+      id: "4",
+      name: "waseem",
+      age: 40,
+      address: "isb",
     },
   ],
 };

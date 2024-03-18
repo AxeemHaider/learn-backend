@@ -11,59 +11,46 @@ app.use(bodyParser.json());
 // Create User
 app.post("/users", (req, res) => {
   const user = req.body;
-  user.id = Math.floor(Math.random() * 10000);
+  const age = typeof user.age;
+  const name = typeof user.name;
+  const address = typeof user.address;
+  const id = user.id;
+  if (age === "number" && name === "string" && address === "string" && !id) {
+    user.id = Math.floor(Math.random() * 10000);
 
-  database.users.push(user);
+    database.users.push(user);
 
-  res.json(user);
-});
-
-// Get all users
-app.get("/users", (req, res) => {
-  const users = database.users;
-  return res.json(users);
-});
-
-// Search user
-app.get("/users/search", (req, res) => {
-  const address: string = req.query.address as string;
-  const name: string = req.query.name as string;
-  console.log(req.query);
-
-  let userAddress: any;
-  if (address) {
-    userAddress = database.users.filter(
-      (e) => e.address?.toLowerCase() === address.toLowerCase()
-    );
+    return res.json(user);
   }
 
-  let userName: any;
-  if (name) {
-    userName = database.users.filter(
-      (e) => e.name?.toLowerCase() === name.toLowerCase()
-    );
-  }
-  let answer;
-  if (userAddress && userName) {
-    answer = [...userAddress, ...userName];
-  }
-
-  res.json(answer);
+  res
+    .status(400)
+    .json({ error: { code: 400, message: "Bad Request! missing name" } });
 });
 
-// Get user by id
-app.get("/users/:id", (req, res) => {
+app.post("/users/:id", (req, res) => {
   const id = req.params.id;
+  const userData = req.body;
+
+  // res.status(400).json({error: {code: 400, message: "Bad Request! missing name"}})
+
+  //upsert
   const user = database.users.find((u) => u.id == id);
+  if (user === undefined) {
+    const id = req.params.id;
+    const userData = req.body;
+    const newData = { id, ...userData };
+    database.users.push(userData);
+    return res.json(newData);
+  } else if (user.id === id) {
+    const userIndex = database.users.findIndex((u) => u.id == id);
+    database.users[userIndex] = { ...database.users[userIndex], ...userData };
+
+    return res.json(database.users[userIndex]);
+  }
+
+  console.log(user);
   res.json(user);
-});
-
-// Delete user
-app.delete("/users/:id", (req, res) => {
-  const id = req.params.id;
-  database.users = database.users.filter((u) => u.id != id);
-
-  res.json(database.users);
 });
 
 // Update user
@@ -79,4 +66,68 @@ app.patch("/users/:id", (req, res) => {
 
 app.listen(5000, () => {
   console.log("Server is running on http://localhost:5000");
+});
+
+// Get all users
+app.get("/users", (req, res) => {
+  const users = database.users;
+  return res.json(users);
+});
+
+// Search user
+app.get("/users/search", (req, res) => {
+  const address: string = req.query.address as string;
+  const name: string = req.query.name as string;
+  const age = req.query.age as string;
+
+  let userData: any;
+  if (address && name) {
+    userData = database.users.filter(
+      (e) =>
+        e.address?.toLowerCase() === address.toLowerCase() &&
+        e.name?.toLowerCase() === name.toLowerCase()
+    );
+  } else if (name) {
+    userData = database.users.filter(
+      (e) => e.name?.toLowerCase() === name.toLowerCase()
+    );
+  } else if (address) {
+    userData = database.users.filter(
+      (e) => e.address?.toLowerCase() === address.toLowerCase()
+    );
+  } else if (age) {
+    if (age.includes(".")) {
+      const operatorAndValue = age.split(".");
+      const op = operatorAndValue[0];
+      const value = parseInt(operatorAndValue[1]);
+
+      if (op === "lt") {
+        userData = database.users.filter((e) => e.age < value);
+      } else if (op === "lte") {
+        userData = database.users.filter((e) => e.age <= value);
+      }
+    } else {
+      const value = parseInt(age);
+      userData = database.users.filter((e) => e.age === value);
+    }
+  } else {
+    userData = database.users;
+  }
+
+  res.json(userData);
+});
+
+// Get user by id
+app.get("/users/:id", (req, res) => {
+  const id = req.params.id;
+  const user = database.users.find((u) => u.id == id);
+  res.json(user);
+});
+
+// Delete user
+app.delete("/users/:id", (req, res) => {
+  const id = req.params.id;
+  database.users = database.users.filter((u) => u.id != id);
+
+  res.json(database.users);
 });
