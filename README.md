@@ -18,3 +18,9 @@
 
 - upsert(Create user if not eles update)
 - search(by name, age)
+
+## Database
+
+- `npm install typeorm --save`
+- `npm install reflect-metadata --save`
+- `npm install pg --save`

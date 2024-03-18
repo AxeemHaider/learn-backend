@@ -1,7 +1,24 @@
+import "reflect-metadata";
 import express from "express";
 import morgan from "morgan";
 import bodyParser from "body-parser";
-import database, { User } from "./database";
+import { DataSource } from "typeorm";
+import User from "./entities/user";
+import database from "./database";
+
+const AppDataSource = new DataSource({
+  type: "postgres",
+  host: "localhost",
+  port: 5432,
+  username: "postgres",
+  password: "password",
+  database: "learn-backend",
+  synchronize: true,
+  logging: true,
+  entities: [User],
+  subscribers: [],
+  migrations: [],
+});
 
 const app = express();
 
@@ -9,14 +26,23 @@ app.use(morgan("dev"));
 app.use(bodyParser.json());
 
 // Create User
-app.post("/users", (req, res) => {
+app.post("/users", async (req, res) => {
   const user = req.body;
-  const age = user.age;
-  user.id = Math.floor(Math.random() * 10000);
+  const age = typeof user.age;
+  const name = typeof user.name;
+  const address = typeof user.address;
+  const id = user.id;
+  if (age === "number" && name === "string" && address === "string" && !id) {
+    user.id = Math.floor(Math.random() * 10000);
 
-  database.users.push(user);
+    database.users.push(user);
 
-  res.json(user);
+    return res.json(user);
+  }
+
+  res
+    .status(400)
+    .json({ error: { code: 400, message: "Bad Request! missing name" } });
 });
 
 app.post("/users/:id", (req, res) => {
@@ -42,6 +68,16 @@ app.post("/users/:id", (req, res) => {
 
   console.log(user);
   res.json(user);
+  // const userRepo = AppDataSource.getRepository(User);
+
+  // const newUser = new User();
+  // newUser.name = user.name;
+  // newUser.email = user.email;
+  // newUser.password = user.password;
+
+  // const newlyCreatedUser = await userRepo.save(newUser);
+
+  // res.json(newlyCreatedUser);
 });
 
 // Update user
@@ -106,19 +142,48 @@ app.get("/users/search", (req, res) => {
   }
 
   res.json(userData);
-});
+  app.get("/users", async (req, res) => {
+    const userRepo = AppDataSource.getRepository(User);
+    const users = await userRepo.find();
+    res.json(users);
+    // const users = database.users;
+    // return res.json(users);
+  });
 
-// Get user by id
-app.get("/users/:id", (req, res) => {
-  const id = req.params.id;
-  const user = database.users.find((u) => u.id == id);
-  res.json(user);
-});
+  // Get user by id
+  app.get("/users/:id", async (req, res) => {
+    const userRepo = AppDataSource.getRepository(User);
+    const id = req.params.id;
+    const user = await userRepo.findOneBy({ id });
+    res.json(user);
+    // const id = req.params.id;
+    // const user = database.users.find((u) => u.id == id);
+    // res.json(user);
+  });
 
-// Delete user
-app.delete("/users/:id", (req, res) => {
-  const id = req.params.id;
-  database.users = database.users.filter((u) => u.id != id);
+  // Delete user
+  app.delete("/users/:id", (req, res) => {
+    // const id = req.params.id;
+    // database.users = database.users.filter((u) => u.id != id);
+    // res.json(database.users);
+  });
 
-  res.json(database.users);
+  // Update user
+  app.patch("/users/:id", (req, res) => {
+    // const id = req.params.id;
+    // const updates = req.body;
+    // const userIndex = database.users.findIndex((u) => u.id == id);
+    // database.users[userIndex] = { ...database.users[userIndex], ...updates };
+    // res.json(database.users[userIndex]);
+  });
+
+  // const main = async () => {
+  //   await AppDataSource.initialize();
+
+  app.listen(5000, () => {
+    console.log("Server is running on http://localhost:5000");
+  });
+  // };
+
+  // main();
 });
