@@ -1,7 +1,24 @@
+import "reflect-metadata";
 import express from "express";
 import morgan from "morgan";
 import bodyParser from "body-parser";
 import database from "./database";
+import { DataSource } from "typeorm";
+import User from "./entities/user";
+
+const AppDataSource = new DataSource({
+  type: "postgres",
+  host: "localhost",
+  port: 5432,
+  username: "postgres",
+  password: "password",
+  database: "learn-backend",
+  synchronize: true,
+  logging: true,
+  entities: [User],
+  subscribers: [],
+  migrations: [],
+});
 
 const app = express();
 
@@ -9,53 +26,62 @@ app.use(morgan("dev"));
 app.use(bodyParser.json());
 
 // Create User
-app.post("/users", (req, res) => {
+app.post("/users", async (req, res) => {
   const user = req.body;
-  user.id = Math.floor(Math.random() * 10000);
+  const userRepo = AppDataSource.getRepository(User);
 
-  database.users.push(user);
+  const newUser = new User();
+  newUser.name = user.name;
+  newUser.email = user.email;
+  newUser.password = user.password;
 
-  res.json(user);
+  const newlyCreatedUser = await userRepo.save(newUser);
+
+  res.json(newlyCreatedUser);
 });
 
 // Get all users
-app.get("/users", (req, res) => {
-  const users = database.users;
-  return res.json(users);
-});
-
-// Search user
-app.get("/users/search", (req, res) => {
-  const query = req.query;
-  res.json(query);
+app.get("/users", async (req, res) => {
+  const userRepo = AppDataSource.getRepository(User);
+  const users = await userRepo.find();
+  res.json(users);
+  // const users = database.users;
+  // return res.json(users);
 });
 
 // Get user by id
-app.get("/users/:id", (req, res) => {
+app.get("/users/:id", async (req, res) => {
+  const userRepo = AppDataSource.getRepository(User);
   const id = req.params.id;
-  const user = database.users.find((u) => u.id == id);
+  const user = await userRepo.findOneBy({ id });
   res.json(user);
+  // const id = req.params.id;
+  // const user = database.users.find((u) => u.id == id);
+  // res.json(user);
 });
 
 // Delete user
 app.delete("/users/:id", (req, res) => {
-  const id = req.params.id;
-  database.users = database.users.filter((u) => u.id != id);
-
-  res.json(database.users);
+  // const id = req.params.id;
+  // database.users = database.users.filter((u) => u.id != id);
+  // res.json(database.users);
 });
 
 // Update user
 app.patch("/users/:id", (req, res) => {
-  const id = req.params.id;
-  const updates = req.body;
-
-  const userIndex = database.users.findIndex((u) => u.id == id);
-  database.users[userIndex] = { ...database.users[userIndex], ...updates };
-
-  res.json(database.users[userIndex]);
+  // const id = req.params.id;
+  // const updates = req.body;
+  // const userIndex = database.users.findIndex((u) => u.id == id);
+  // database.users[userIndex] = { ...database.users[userIndex], ...updates };
+  // res.json(database.users[userIndex]);
 });
 
-app.listen(5000, () => {
-  console.log("Server is running on http://localhost:5000")
-});
+const main = async () => {
+  await AppDataSource.initialize();
+
+  app.listen(5000, () => {
+    console.log("Server is running on http://localhost:5000");
+  });
+};
+
+main();
