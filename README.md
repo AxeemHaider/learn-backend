@@ -23,3 +23,8 @@
 - `npm install typeorm --save`
 - `npm install reflect-metadata --save`
 - `npm install pg --save`
+
+## Request validation
+
+- `npm install --save class-validator`
+- `npm install --save class-transformer`
