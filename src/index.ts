@@ -34,6 +34,12 @@ app.post("/users", async (req, res) => {
   newUser.email = user.email;
   newUser.password = user.password;
 
+  // const newUser: User = {
+  //   name: user.name,
+  //   email: user.email,
+  //   password: user.password
+  // }
+
   const newlyCreatedUser = await userRepo.save(newUser);
 
   res.json(newlyCreatedUser);
@@ -60,19 +66,22 @@ app.get("/users/:id", async (req, res) => {
 });
 
 // Delete user
-app.delete("/users/:id", (req, res) => {
-  // const id = req.params.id;
+app.delete("/users/:id", async (req, res) => {
+  const userRepo = AppDataSource.getRepository(User);
+  const id = req.params.id;
+  const updated = await userRepo.delete(id);
   // database.users = database.users.filter((u) => u.id != id);
-  // res.json(database.users);
+  res.json(updated);
 });
 
 // Update user
-app.patch("/users/:id", (req, res) => {
-  // const id = req.params.id;
-  // const updates = req.body;
-  // const userIndex = database.users.findIndex((u) => u.id == id);
-  // database.users[userIndex] = { ...database.users[userIndex], ...updates };
-  // res.json(database.users[userIndex]);
+app.patch("/users/:id", async (req, res) => {
+  const userRepo = AppDataSource.getRepository(User);
+
+  const id = req.params.id;
+  const user = req.body;
+  const updated = await userRepo.update(id, user);
+  res.json(updated);
 });
 
 const main = async () => {
