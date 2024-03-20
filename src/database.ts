@@ -1,5 +1,6 @@
 import { DataSource } from "typeorm";
 import User from "./entities/user";
+import Product from "./entities/product";
 
 const Database = new DataSource({
   type: "postgres",
@@ -10,7 +11,7 @@ const Database = new DataSource({
   database: "learn-backend",
   synchronize: true,
   logging: true,
-  entities: [User],
+  entities: [User, Product],
   subscribers: [],
   migrations: [],
 });
