@@ -1,11 +1,43 @@
 import { Express } from "express";
+import jwt from "jsonwebtoken";
 import Database from "../database";
 import User from "../entities/user";
 import requestValidatation from "../middlewares/request-validation";
-import { UserCreateRequest } from "../dto/user";
+import { UserCreateRequest, UserLoginRequest } from "../dto/user";
 
 const userRoutes = (app: Express) => {
   const userRepo = Database.getRepository(User);
+
+  app.post(
+    "/users/login",
+    requestValidatation(UserLoginRequest),
+    async (req, res) => {
+      const body = req.body;
+
+      const user = await userRepo.findOneBy({
+        email: body.email,
+        password: body.password,
+      });
+
+      if (!user) {
+        return res.status(401).json({
+          error: {
+            code: 401,
+            message: "Unathorized! invalid email or password",
+          },
+        });
+      }
+
+      const token = jwt.sign(
+        { user_id: user.id, name: user.name },
+        process.env.JWT_PASSWORD,
+      );
+
+      res.json({
+        token,
+      });
+    },
+  );
 
   // Create User
   app.post(

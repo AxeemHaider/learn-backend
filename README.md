@@ -28,3 +28,12 @@
 
 - `npm install --save class-validator`
 - `npm install --save class-transformer`
+
+## Env
+
+- `npm install --save dotenv`
+
+## Authentication
+
+- `npm install --save jsonwebtoken`
+- `npm install --save-dev @types/jsonwebtoken` (Install Types)

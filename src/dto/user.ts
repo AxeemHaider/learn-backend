@@ -11,3 +11,11 @@ export class UserCreateRequest {
   @IsNotEmpty()
   password: string;
 }
+
+export class UserLoginRequest {
+  @IsNotEmpty()
+  email: string;
+
+  @IsNotEmpty()
+  password: string;
+}
