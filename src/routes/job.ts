@@ -1,44 +1,26 @@
 import { Express } from "express";
-import jwt from "jsonwebtoken";
 import Database from "../database";
 import Job from "../entities/job";
+import loginMiddleware from "../middlewares/login";
+
+interface User {
+  user_id: string;
+  name: string;
+}
 
 const jobRoutes = (app: Express) => {
   const jobRepo = Database.getRepository(Job);
 
-  app.post("/jobs", async (req, res) => {
+  app.post("/jobs", loginMiddleware(), async (req, res) => {
     const body = req.body;
-    const headers = req.headers.authorization;
+    const loggedInUser = (req as any).user as User;
 
-    if (!headers) {
-      return res.status(403).json({
-        error: {
-          code: 403,
-          message: "Forbidden access! you don't have permission to access this",
-        },
-      });
-    }
+    const job = new Job();
+    job.title = body.title;
 
-    const headerParts = headers.split(" ");
-    const token = headerParts[1];
+    const newJob = await jobRepo.save(job);
 
-    try {
-      const payload = jwt.verify(token, process.env.JWT_PASSWORD);
-
-      const job = new Job();
-      job.title = body.title;
-
-      const newJob = await jobRepo.save(job);
-
-      res.json(newJob);
-    } catch (e: any) {
-      res.status(401).json({
-        error: {
-          code: 401,
-          message: e.message,
-        },
-      });
-    }
+    return res.json(loggedInUser);
   });
 };
 
